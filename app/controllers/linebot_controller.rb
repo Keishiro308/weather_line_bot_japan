@@ -103,7 +103,7 @@ class LinebotController < ApplicationController
         User.find_by(line_id: line_id).destroy
       end
     }
-    head :ok
+    'OK'
   end
 
   private
