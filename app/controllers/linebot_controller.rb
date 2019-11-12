@@ -5,7 +5,6 @@ class LinebotController < ApplicationController
   require 'rexml/document'
 
   # callbackアクションのCSRFトークン認証を無効
-  protect_from_forgery :except => [:callback]
 
   def callback
     body = request.body.read
@@ -41,51 +40,42 @@ class LinebotController < ApplicationController
               push =
                 "明日の天気ですね。\n明日は雨が降らない予定です！\nまた明日の朝の最新の天気予報で雨が降りそうだったらお伝えいたします。"
             end
-            when /.*(明後日|あさって|二日後|2日後|２日後).*/
-              per06to12 = doc.elements[xpath + 'info[3]/rainfallchance/period[2]l'].text
-              per12to18 = doc.elements[xpath + 'info[3]/rainfallchance/period[3]l'].text
-              per18to24 = doc.elements[xpath + 'info[3]/rainfallchance/period[4]l'].text
-              if per06to12.to_i >= min_per || per12to18.to_i >= min_per || per18to24.to_i >= min_per
-              push =
-                "明後日の天気ですか。。。\n非常に言いにくいのですが。。。\n明後日は雨が降りそうです。\n当日の朝に雨が降りそうだった場合、またお伝えいたします。"
-              else
+          when /.*(明後日|あさって|二日後|2日後|２日後).*/
+            per06to12 = doc.elements[xpath + 'info[3]/rainfallchance/period[2]l'].text
+            per12to18 = doc.elements[xpath + 'info[3]/rainfallchance/period[3]l'].text
+            per18to24 = doc.elements[xpath + 'info[3]/rainfallchance/period[4]l'].text
+            if per06to12.to_i >= min_per || per12to18.to_i >= min_per || per18to24.to_i >= min_per
+            push ="明後日の天気ですか。。。\n非常に言いにくいのですが。。。\n明後日は雨が降りそうです。\n当日の朝に雨が降りそうだった場合、またお伝えいたします。"
+            else
+              push ="明後日の天気ですね？\n明後日は雨は降らない予定です。\nまた当日の朝の最新の天気予報で雨が降りそうだった場合お伝えいたします。！"
+            end
+          when /.*(明々後日|しあさって|三日後|3日後|３日後).*/
+            per06to12 = doc.elements[xpath + 'info[4]/rainfallchance/period[2]l'].text
+            per12to18 = doc.elements[xpath + 'info[4]/rainfallchance/period[3]l'].text
+            per18to24 = doc.elements[xpath + 'info[4]/rainfallchance/period[4]l'].text
+            if per06to12.to_i >= min_per || per12to18.to_i >= min_per || per18to24.to_i >= min_per
+              push ="明々後日の天気ですか。。。\nまだまだ諦めるには早いですが\n明々後日は雨が降りそうです。\n当日の朝に雨が降りそうだった場合、またお伝えいたします。"
+            else
+              push ="明々後日の天気ですね？\n明々後日は雨は降らない予定です。\nまた当日の朝の最新の天気予報で雨が降りそうだった場合お伝えいたします。！"
+            end
+          when /.*(こんにちは|こんばんは|初めまして|はじめまして|おはよう).*/
+            push ="こんにちは。\n声をかけてくれてありがとうございます。\n今日があなたにとっていい日になりますように"
+          else
+            per06to12 = doc.elements[xpath + 'info/rainfallchance/period[2]l'].text
+            per12to18 = doc.elements[xpath + 'info/rainfallchance/period[3]l'].text
+            per18to24 = doc.elements[xpath + 'info/rainfallchance/period[4]l'].text
+            if per06to12.to_i >= min_per || per12to18.to_i >= min_per || per18to24.to_i >= min_per
+              word =["雨ですが、負けずに行きましょう！","雨に負けずファイトです！！","止まない雨はありません。あ、こういうのは求めてませんか。。（汗）"].sample
+              push ="今日の天気ですか？\n今日は雨が降りそうなので傘があった方が安心ですね。\n　  6〜12時　#{per06to12}％\n　12〜18時　 #{per12to18}％\n　18〜24時　#{per18to24}％\n#{word}"
+            else
+              word =
+              ["洗濯日和ですね！",
+                "散歩でもいかがですか？",
+                "良い1日を"].sample
                 push =
-                  "明後日の天気ですね？\n明後日は雨は降らない予定です。\nまた当日の朝の最新の天気予報で雨が降りそうだった場合お伝えいたします。！"
-              end
-              when /.*(明々後日|しあさって|三日後|3日後|３日後).*/
-                per06to12 = doc.elements[xpath + 'info[4]/rainfallchance/period[2]l'].text
-                per12to18 = doc.elements[xpath + 'info[4]/rainfallchance/period[3]l'].text
-                per18to24 = doc.elements[xpath + 'info[4]/rainfallchance/period[4]l'].text
-                if per06to12.to_i >= min_per || per12to18.to_i >= min_per || per18to24.to_i >= min_per
-                  push =
-                  "明々後日の天気ですか。。。\nまだまだ諦めるには早いですが\n明々後日は雨が降りそうです。\n当日の朝に雨が降りそうだった場合、またお伝えいたします。"
-                else
-                  push =
-                  "明々後日の天気ですね？\n明々後日は雨は降らない予定です。\nまた当日の朝の最新の天気予報で雨が降りそうだった場合お伝えいたします。！"
-                end
-              when /.*(こんにちは|こんばんは|初めまして|はじめまして|おはよう).*/
-                push =
-                "こんにちは。\n声をかけてくれてありがとうございます。\n今日があなたにとっていい日になりますように"
-              else
-                per06to12 = doc.elements[xpath + 'info/rainfallchance/period[2]l'].text
-                per12to18 = doc.elements[xpath + 'info/rainfallchance/period[3]l'].text
-                per18to24 = doc.elements[xpath + 'info/rainfallchance/period[4]l'].text
-                if per06to12.to_i >= min_per || per12to18.to_i >= min_per || per18to24.to_i >= min_per
-                  word =
-                  ["雨ですが、負けずに行きましょう！",
-                    "雨に負けずファイトです！！",
-                    "止まない雨はありません。あ、こういうのは求めてませんか。。（汗）"].sample
-                    push =
-                    "今日の天気ですか？\n今日は雨が降りそうなので傘があった方が安心ですね。\n　  6〜12時　#{per06to12}％\n　12〜18時　 #{per12to18}％\n　18〜24時　#{per18to24}％\n#{word}"
-                else
-                  word =
-                  ["洗濯日和ですね！",
-                    "散歩でもいかがですか？",
-                    "良い1日を"].sample
-                    push =
-                    "今日の天気ですね。\n今日は雨は降らなさそうです。\n#{word}"
-                end
-              end
+                "今日の天気ですね。\n今日は雨は降らなさそうです。\n#{word}"
+            end
+          end
         when Line::Bot::Event::MessageType::Location
           long = event["message"]["longitude"]
           lat = event["message"]["latitude"]
