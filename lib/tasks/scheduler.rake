@@ -36,7 +36,7 @@ namespace :scheduler do
           }
           response = client.push_message(user.line_id, message)
         end
+        "OK"
       end
-    "OK"
   end
 end
