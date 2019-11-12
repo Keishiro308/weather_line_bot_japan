@@ -1,0 +1,2 @@
+class LocInfo < ApplicationRecord
+end
