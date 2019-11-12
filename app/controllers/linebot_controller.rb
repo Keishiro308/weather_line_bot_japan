@@ -22,11 +22,12 @@ class LinebotController < ApplicationController
          # ユーザーからテキスト形式のメッセージが送られて来た場合
        when Line::Bot::Event::MessageType::Text
          # event.message['text']：ユーザーから送られたメッセージ
+         user = User.find_by(line_id: event['source']['userId'])
          input = event.message['text']
-         url  = "https://www.drk7.jp/weather/xml/27.xml"
+         url  = "https://www.drk7.jp/weather/xml/#{user.pref_id}.xml"
          xml  = open( url ).read.toutf8
          doc = REXML::Document.new(xml)
-         xpath = 'weatherforecast/pref/area[1]/'
+         xpath = "weatherforecast/pref/area[#{user.city_id}]/"
          min_per = 30
          case input
          when /.*(明日|あした).*/
@@ -86,7 +87,9 @@ class LinebotController < ApplicationController
            end
          end
        when Line::Bot::Event::MessageType::Location
-         location = LocInfo.order(Arel.sql('pow((event["message"]["longitude"]-long),2)+pow((event["message"]["latitude"]-lat),2) ASC')).first
+         long = event["message"]["longitude"]
+         lat = event["message"]["latitude"]
+         location = LocInfo.order(Arel.sql("pow((#{long}-long),2)+pow((#{lat}-lat),2) ASC)").first
          User.update_columns(city_id: location.city_id, pref_id: location.pref_id)
          push = "天気を表示する地点を変更しました。"
          # テキスト以外（画像等）のメッセージが送られた場合
