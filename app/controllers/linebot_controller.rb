@@ -77,10 +77,11 @@ class LinebotController < ApplicationController
             end
           end
         when Line::Bot::Event::MessageType::Location
+          user = User.find_by(line_id: event['source']['userId'])
           long = event["message"]["longitude"]
           lat = event["message"]["latitude"]
           location = LocInfo.order(Arel.sql("pow((#{long}-long),2)+pow((#{lat}-lat),2) ASC")).first
-          User.update_columns(city_id: location.city_id, pref_id: location.pref_id)
+          user.update_columns(city_id: location.city_id, pref_id: location.pref_id)
           push = "天気を表示する地点を変更しました。"
          # テキスト以外（画像等）のメッセージが送られた場合
         else
