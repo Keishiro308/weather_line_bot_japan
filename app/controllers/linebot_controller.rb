@@ -105,7 +105,7 @@ class LinebotController < ApplicationController
         User.find_by(line_id: line_id).destroy
       end
     }
-    head 200
+    head:ok
   end
 
   private
