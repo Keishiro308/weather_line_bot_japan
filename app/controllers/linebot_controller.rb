@@ -22,12 +22,12 @@ class LinebotController < ApplicationController
         when Line::Bot::Event::MessageType::Text
           # event.message['text']：ユーザーから送られたメッセージ
           input = event.message['text']
+          user = User.find_by(line_id: event['source']['userId'])
           url  = "https://www.drk7.jp/weather/xml/#{user.pref_id}.xml"
           xml  = open( url ).read.toutf8
           doc = REXML::Document.new(xml)
           xpath = "weatherforecast/pref/area[#{user.city_id}]/"
           min_per = 30
-          user = User.find_by(line_id: event['source']['userId'])
           case input
           when /.*(明日|あした).*/
             per06to12 = doc.elements[xpath + 'info[2]/rainfallchance/period[2]'].text
