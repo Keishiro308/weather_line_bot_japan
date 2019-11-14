@@ -23,7 +23,12 @@ class LinebotController < ApplicationController
           # event.message['text']：ユーザーから送られたメッセージ
           input = event.message['text']
           user = User.find_by(line_id: event['source']['userId'])
-          url  = "https://www.drk7.jp/weather/xml/#{user.pref_id}.xml"
+          if user.pref_id < 10
+            pref_id = '0' + user.pref_id.to_s
+          else
+            pref_id = user.pref_id
+          end
+          url  = "https://www.drk7.jp/weather/xml/#{pref_id}.xml"
           xml  = open( url ).read.toutf8
           doc = REXML::Document.new(xml)
           xpath = "weatherforecast/pref/area[#{user.city_id}]/"
