@@ -12,7 +12,7 @@ namespace :scheduler do
     }
     users = User.all
     users.each do |user|
-      if user.pref_id.to_s < 10
+      if user.pref_id.to_i < 10
         pref_id = '0' + user.pref_id.to_s
       else
         pref_id = user.pref_id
