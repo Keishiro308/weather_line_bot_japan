@@ -12,7 +12,11 @@ namespace :scheduler do
     }
     users = User.all
     users.each do |user|
-      user.pref_id < 10 ? pref_id = '0' + user.pref_id.to_s : pref_id = user.pref_id
+      if user.pref_id < 10
+        pref_id = '0' + user.pref_id.to_s
+      else
+        pref_id = user.pref_id
+      end
       url  = "https://www.drk7.jp/weather/xml/#{user.pref_id}.xml"
       #01
       xml  = open( url ).read.toutf8
