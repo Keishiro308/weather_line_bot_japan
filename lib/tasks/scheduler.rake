@@ -17,7 +17,7 @@ namespace :scheduler do
       else
         pref_id = user.pref_id
       end
-      url  = "https://www.drk7.jp/weather/xml/#{user.pref_id}.xml"
+      url  = "https://www.drk7.jp/weather/xml/#{pref_id}.xml"
       #01
       xml  = open( url ).read.toutf8
       doc = REXML::Document.new(xml)
