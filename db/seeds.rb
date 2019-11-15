@@ -5,4 +5,5 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
-User.create(pref_id: 2, city_id: 2, line_id: "jakhfnaoivkhnahvn")
+User.create(pref_id: 2, city_id: 2, line_id: "Uc72e7ebe3c5d4f2419c1734ff5aa3ebd")
+User.create(line_id: "jjfherigrhirhir")
