@@ -20,7 +20,6 @@ namespace :scheduler do
         end
         url  = "https://www.drk7.jp/weather/xml/#{pref_id}.xml"
         #01
-        puts url
         xml  = open( url ).read.toutf8
         doc = REXML::Document.new(xml)
         xpath = "weatherforecast/pref/area[#{user.city_id}]/info/rainfallchance/"
