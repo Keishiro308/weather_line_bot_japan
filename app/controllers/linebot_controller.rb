@@ -9,6 +9,7 @@ class LinebotController < ApplicationController
   def callback
     body = request.body.read
     signature = request.env['HTTP_X_LINE_SIGNATURE']
+
     unless client.validate_signature(body, signature)
       error 400 do 'Bad Request' end
     end
@@ -71,7 +72,7 @@ class LinebotController < ApplicationController
             per18to24 = doc.elements[xpath + 'info/rainfallchance/period[4]l'].text
             if per06to12.to_i >= min_per || per12to18.to_i >= min_per || per18to24.to_i >= min_per
               word =["雨ですが、負けずに行きましょう！","雨に負けずファイトです！！","止まない雨はありません。あ、こういうのは求めてませんか。。（汗）"].sample
-              push ="今日の天気ですか？\n今日は雨が降りそうなので傘があった方が安心ですね。\n　  6〜12時　#{per06to12}％\n　12〜18時　 #{per12to18}％\n　18〜24時　#{per18to24}％\n#{word}"
+              push ="今日の天気ですか？\n今日は雨が降りそうなので傘があった方が安心ですね\u{2614}\n　  6〜12時　#{per06to12}％\n　12〜18時　 #{per12to18}％\n　18〜24時　#{per18to24}％\n#{word}"
             else
               word =
               ["洗濯日和ですね！",
@@ -87,7 +88,7 @@ class LinebotController < ApplicationController
           lat = event["message"]["latitude"]
           location = LocInfo.order(Arel.sql("pow((#{long}-long),2)+pow((#{lat}-lat),2) ASC")).first
           user.update_columns(city_id: location.city_id,pref_id: location.pref_id)
-          push = "天気を表示する地点を変更しました。"
+          push = "天気を表示する地点を変更しました\u{100079}"
          # テキスト以外（画像等）のメッセージが送られた場合
         else
           push = "テキスト以外はわかりません。"
@@ -99,9 +100,23 @@ class LinebotController < ApplicationController
         client.reply_message(event['replyToken'], message)
         # LINEお友達追された場合（機能②）
       when Line::Bot::Event::Follow
-        # 登録したユーザーのidをユーザーテーブルに格納
+        push = "ご登録ありがとうございます\u{100001}\n位置情報を送信するとその地点の天気を取得できます\n雨が降りそうな日の朝７時に、その日傘が必要かお知らせします\u{1F556 2614}\nまずは位置情報を送信してください\u{1F5FE 1F9ED}"
         line_id = event['source']['userId']
         User.create(line_id: line_id)
+        message = {
+          type:'text',
+          text: push,
+          quickReply:{
+              items:[
+                type: 'action',
+                action: {
+                  type: 'location',
+                  label: '位置情報を送信する'
+                }
+              ]
+          }
+        }
+        client.push_message(line_id, message)
         # LINEお友達解除された場合（機能③）
       when Line::Bot::Event::Unfollow
         # お友達解除したユーザーのデータをユーザーテーブルから削除
