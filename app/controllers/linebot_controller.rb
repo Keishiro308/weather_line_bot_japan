@@ -24,7 +24,7 @@ class LinebotController < ApplicationController
           # event.message['text']：ユーザーから送られたメッセージ
           input = event.message['text']
           user = User.find_by(line_id: event['source']['userId'])
-          if user.pref_id.present?
+          if user && user.pref_id.present?
             city_id = user.city_id
             if user.pref_id < 10
               pref_id = '0' + user.pref_id.to_s
